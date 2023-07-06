@@ -1,0 +1,10 @@
+*.pyc
+.idea
+scripts/
+Lib/
+lib/
+lib64/
+Include/
+include/
+*.cfg
+*.egg-info
