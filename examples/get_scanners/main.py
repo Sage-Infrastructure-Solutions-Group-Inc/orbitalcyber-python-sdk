@@ -25,7 +25,14 @@ client = OrbitalClient(args.id, args.key, args.secret, disable_ssl_verification=
                        proxy_config=proxy_config, api_host=args.api_host)
 logging.info(f"Authenticated to the OrbitalAPI at instance {args.api_host} successfully.")
 dropship_scanners_resp = client.get('/api/scan/scanners')
+last_scanner = None
 if dropship_scanners_resp.status_code == 200:
     scanners = dropship_scanners_resp.json()
     for scanner in scanners.get('page'):
         print(f"Got scanner: {dumps(scanner, indent=4)}")
+        last_scanner = scanner
+
+if last_scanner:
+    scanners_data_resp = client.get(f'/api/scan/config/{last_scanner.get("id")}')
+    if scanners_data_resp.status_code == 200:
+        print(f"Individual scanner details: {dumps(scanners_data_resp.json(), indent=4)}")
