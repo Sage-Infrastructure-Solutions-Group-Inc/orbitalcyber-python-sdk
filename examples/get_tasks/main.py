@@ -26,7 +26,14 @@ client = OrbitalClient(args.id, args.key, args.secret, disable_ssl_verification=
 logging.info(f"Authenticated to the OrbitalAPI at instance {args.api_host} successfully.")
 tasks = client.get('/api/scan/dropship/tasks')
 tasks_data = tasks.json()
-
+last_task = None
+# Print the first page of tasks
 for task in tasks_data.get('page'):
     print(f"Got task: {dumps(task, indent=4)}")
+    last_task = task
 
+if last_task:
+    single_task_query = client.get(f'/api/scan/dropship/task/{last_task.get("id")}')
+    task_data = single_task_query.json()
+    print('The last task queried directly:')
+    print(dumps(task_data, indent=4))
