@@ -5,8 +5,6 @@ import logging
 from sys import exit
 import requests
 from json import dumps, loads
-from bz2 import decompress as bz_decompress
-from zlib import decompress as zlib_decompress
 
 parser = ArgumentParser(description='basic example of how to fetch a list of reports from OrbitalCyber.')
 parser.add_argument('--key', default=environ.get('ORBITAL_KEY'), help='the API client key.', required=True)
@@ -26,21 +24,9 @@ proxy_config = {'http': args.add_http_proxy, 'https': args.add_https_proxy}
 client = OrbitalClient(args.id, args.key, args.secret, disable_ssl_verification=args.disable_ssl_verification,
                        proxy_config=proxy_config, api_host=args.api_host)
 logging.info(f"Authenticated to the OrbitalAPI at instance {args.api_host} successfully.")
-reports = client.get('/api/scan/dropship/reports')
-if reports.status_code != 200: exit(1)
-reports = reports.json()
-print(dumps(reports, indent=2)) # Print the list of reports
-report_list = reports.get('page')
-if len(report_list) > 0:
-    report_download_link = client.get(f'/api/scan/dropship/report/download/{report_list[0].get("id")}')
-    if report_download_link.status_code != 200: exit(1)
-    print(report_download_link.json())  # Print the signed download link
-    report_download_url = report_download_link.json().get('url')
-    data = requests.get(report_download_url).content
-    # OrbitalCyber used to use bzip compression. Some users may need to include the following code for compatibility.
-    try:
-        data = zlib_decompress(data)
-    except (ValueError, OSError, TypeError):
-        data = bz_decompress(data)
-    data = loads(data)
-    print(dumps(data, indent=4)) # Print the decompressed report data
+tasks = client.get('/api/scan/dropship/tasks')
+tasks_data = tasks.json()
+
+for task in tasks_data.get('page'):
+    print(f"Got task: {dumps(task, indent=4)}")
+
