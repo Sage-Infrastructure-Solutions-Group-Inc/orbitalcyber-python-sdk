@@ -6,7 +6,7 @@ from sys import exit
 import requests
 from json import dumps, loads
 
-parser = ArgumentParser(description='basic example of how to fetch a list of reports from OrbitalCyber.')
+parser = ArgumentParser(description='basic example of how to fetch a list of tasks from OrbitalCyber.')
 parser.add_argument('--key', default=environ.get('ORBITAL_KEY'), help='the API client key.', required=True)
 parser.add_argument('--secret', default=environ.get('ORBITAL_SECRET'), help='the API client secret.', required=True)
 parser.add_argument('--id', default=environ.get('ORBITAL_ID'), help='the API client id (guid).')
@@ -24,15 +24,5 @@ proxy_config = {'http': args.add_http_proxy, 'https': args.add_https_proxy}
 client = OrbitalClient(args.id, args.key, args.secret, disable_ssl_verification=args.disable_ssl_verification,
                        proxy_config=proxy_config, api_host=args.api_host)
 logging.info(f"Authenticated to the OrbitalAPI at instance {args.api_host} successfully.")
-dropship_scanners_resp = client.get('/api/scan/scanners')
-last_scanner = None
-if dropship_scanners_resp.status_code == 200:
-    scanners = dropship_scanners_resp.json()
-    for scanner in scanners.get('page'):
-        print(f"Got scanner: {dumps(scanner, indent=4)}")
-        last_scanner = scanner
-
-if last_scanner:
-    scanners_data_resp = client.get(f'/api/scan/config/{last_scanner.get("id")}')
-    if scanners_data_resp.status_code == 200:
-        print(f"Individual scanner details: {dumps(scanners_data_resp.json(), indent=4)}")
+resp = client.get('/api/auth/company-mgmt/users')
+print(resp.content)
